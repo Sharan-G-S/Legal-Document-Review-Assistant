@@ -191,9 +191,6 @@ Legal Document Review Assistant/
 - **Data Control**: You maintain full control over your documents and analysis results
 - **Secure Storage**: Documents and results are stored in local directories
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit issues or pull requests.
 
 ## 📝 License
 
