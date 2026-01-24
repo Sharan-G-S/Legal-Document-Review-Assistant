@@ -12,8 +12,13 @@ class Config:
     PROCESSED_FOLDER = BASE_DIR / 'processed'
     REPORTS_FOLDER = BASE_DIR / 'reports'
     VERSIONS_FOLDER = BASE_DIR / 'versions'
+    BATCH_FOLDER = BASE_DIR / 'batches'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
     ALLOWED_EXTENSIONS = {'pdf', 'docx', 'doc'}
+    
+    # Batch processing configuration
+    MAX_BATCH_SIZE = 10  # Maximum documents per batch
+    CONCURRENT_WORKERS = 3  # Number of parallel processing workers
     
     # AI Model configuration
     SPACY_MODEL = 'en_core_web_sm'  # Will be downloaded if not present
@@ -53,7 +58,7 @@ class Config:
     @classmethod
     def init_app(cls):
         """Initialize application directories"""
-        for folder in [cls.UPLOAD_FOLDER, cls.PROCESSED_FOLDER, cls.REPORTS_FOLDER, cls.VERSIONS_FOLDER]:
+        for folder in [cls.UPLOAD_FOLDER, cls.PROCESSED_FOLDER, cls.REPORTS_FOLDER, cls.VERSIONS_FOLDER, cls.BATCH_FOLDER]:
             folder.mkdir(parents=True, exist_ok=True)
 
 class DevelopmentConfig(Config):

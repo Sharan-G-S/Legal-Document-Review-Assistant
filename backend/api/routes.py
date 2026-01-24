@@ -4,8 +4,10 @@ from pathlib import Path
 from config import Config
 from services.document_processor import DocumentProcessor
 from services.version_manager import VersionManager
+from services.batch_processor import BatchProcessor
 from utils.pdf_generator import PDFReportGenerator
 import os
+import threading
 
 # Create blueprint
 api_bp = Blueprint('api', __name__)
@@ -19,6 +21,14 @@ processor = DocumentProcessor(
 
 # Initialize version manager
 version_manager = VersionManager(config.VERSIONS_FOLDER)
+
+# Initialize batch processor
+batch_processor = BatchProcessor(
+    upload_folder=config.UPLOAD_FOLDER,
+    processed_folder=config.PROCESSED_FOLDER,
+    batch_folder=config.BATCH_FOLDER,
+    max_workers=config.CONCURRENT_WORKERS
+)
 
 def allowed_file(filename):
     """Check if file extension is allowed"""
@@ -379,3 +389,122 @@ def compare_versions(version1_id, version2_id):
     except Exception as e:
         return jsonify({'error': f'Error comparing versions: {str(e)}'}), 500
 
+
+# ============= BATCH PROCESSING ENDPOINTS =============
+
+@api_bp.route('/batch/upload', methods=['POST'])
+def batch_upload():
+    """Upload and process multiple documents in a batch"""
+    try:
+        # Check if files are present
+        if 'files' not in request.files:
+            return jsonify({'error': 'No files provided'}), 400
+        
+        files = request.files.getlist('files')
+        
+        if not files or len(files) == 0:
+            return jsonify({'error': 'No files selected'}), 400
+        
+        # Check batch size limit
+        if len(files) > Config.MAX_BATCH_SIZE:
+            return jsonify({
+                'error': f'Batch size exceeds maximum limit of {Config.MAX_BATCH_SIZE} documents'
+            }), 400
+        
+        # Validate all files
+        file_data = []
+        for file in files:
+            if file.filename == '':
+                continue
+            
+            if not allowed_file(file.filename):
+                return jsonify({
+                    'error': f'Invalid file type for {file.filename}. Allowed types: {", ".join(Config.ALLOWED_EXTENSIONS)}'
+                }), 400
+            
+            # Save file
+            filename = secure_filename(file.filename)
+            file_path = processor.save_uploaded_file(file, filename)
+            file_data.append((filename, file_path))
+        
+        if not file_data:
+            return jsonify({'error': 'No valid files to process'}), 400
+        
+        # Create batch
+        batch_id = batch_processor.create_batch(file_data)
+        
+        # Start processing in background thread
+        def process_in_background():
+            batch_processor.process_batch(batch_id, file_data)
+        
+        thread = threading.Thread(target=process_in_background)
+        thread.daemon = True
+        thread.start()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Batch created with {len(file_data)} documents',
+            'batch_id': batch_id,
+            'total_documents': len(file_data)
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            'error': f'Error creating batch: {str(e)}'
+        }), 500
+
+@api_bp.route('/batch/<batch_id>/status', methods=['GET'])
+def get_batch_status(batch_id):
+    """Get the current status of a batch job"""
+    try:
+        status = batch_processor.get_batch_status(batch_id)
+        return jsonify({
+            'success': True,
+            'status': status
+        }), 200
+    
+    except FileNotFoundError:
+        return jsonify({
+            'error': 'Batch not found'
+        }), 404
+    
+    except Exception as e:
+        return jsonify({
+            'error': f'Error retrieving batch status: {str(e)}'
+        }), 500
+
+@api_bp.route('/batch/<batch_id>/results', methods=['GET'])
+def get_batch_results(batch_id):
+    """Get comprehensive results for a completed batch"""
+    try:
+        results = batch_processor.get_batch_results(batch_id)
+        return jsonify({
+            'success': True,
+            'results': results
+        }), 200
+    
+    except FileNotFoundError:
+        return jsonify({
+            'error': 'Batch not found'
+        }), 404
+    
+    except Exception as e:
+        return jsonify({
+            'error': f'Error retrieving batch results: {str(e)}'
+        }), 500
+
+@api_bp.route('/batches', methods=['GET'])
+def list_batches():
+    """List all batch jobs"""
+    try:
+        batches = batch_processor.list_batches()
+        return jsonify({
+            'success': True,
+            'batches': batches,
+            'count': len(batches)
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            'error': f'Error listing batches: {str(e)}'
+        }), 500
