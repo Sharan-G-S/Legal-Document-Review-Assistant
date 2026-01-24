@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 from pathlib import Path
 from config import Config
 from services.document_processor import DocumentProcessor
+from services.version_manager import VersionManager
 from utils.pdf_generator import PDFReportGenerator
 import os
 
@@ -15,6 +16,9 @@ processor = DocumentProcessor(
     upload_folder=config.UPLOAD_FOLDER,
     processed_folder=config.PROCESSED_FOLDER
 )
+
+# Initialize version manager
+version_manager = VersionManager(config.VERSIONS_FOLDER)
 
 def allowed_file(filename):
     """Check if file extension is allowed"""
@@ -266,8 +270,112 @@ def api_documentation():
                 'path': '/api/stats',
                 'method': 'GET',
                 'description': 'Get overall statistics'
+            },
+            {
+                'path': '/api/document/<id>/version',
+                'method': 'POST',
+                'description': 'Upload new version of document'
+            },
+            {
+                'path': '/api/document/<id>/versions',
+                'method': 'GET',
+                'description': 'Get all versions of document'
+            },
+            {
+                'path': '/api/version/<version_id>',
+                'method': 'GET',
+                'description': 'Get specific version'
+            },
+            {
+                'path': '/api/compare/<v1_id>/<v2_id>',
+                'method': 'GET',
+                'description': 'Compare two versions'
+            },
+            {
+                'path': '/api/version/<version_id>/restore',
+                'method': 'POST',
+                'description': 'Restore previous version'
             }
         ]
     }
     
     return jsonify(docs), 200
+
+# ============= VERSION MANAGEMENT ENDPOINTS =============
+
+@api_bp.route('/document/<document_id>/version', methods=['POST'])
+def upload_new_version(document_id):
+    """Upload a new version of an existing document"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        if not allowed_file(file.filename):
+            return jsonify({
+                'error': f'Invalid file type. Allowed types: {", ".join(Config.ALLOWED_EXTENSIONS)}'
+            }), 400
+        
+        filename = secure_filename(file.filename)
+        file_path = processor.save_uploaded_file(file, filename)
+        document = processor.process_document(file_path, filename)
+        version_data = version_manager.create_version(document, parent_id=document_id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'New version uploaded successfully',
+            'version': version_data,
+            'document': document.to_dict()
+        }), 200
+    except Exception as e:
+        return jsonify({'error': f'Error uploading new version: {str(e)}'}), 500
+
+@api_bp.route('/document/<document_id>/versions', methods=['GET'])
+def get_document_versions(document_id):
+    """Get all versions of a document"""
+    try:
+        versions = version_manager.get_versions(document_id)
+        return jsonify({
+            'success': True,
+            'document_id': document_id,
+            'versions': versions,
+            'count': len(versions)
+        }), 200
+    except Exception as e:
+        return jsonify({'error': f'Error retrieving versions: {str(e)}'}), 500
+
+@api_bp.route('/version/<version_id>', methods=['GET'])
+def get_version(version_id):
+    """Get a specific version"""
+    try:
+        version = version_manager.get_version_by_id(version_id)
+        if not version:
+            return jsonify({'error': 'Version not found'}), 404
+        document = processor.load_document_data(version_id)
+        return jsonify({
+            'success': True,
+            'version': version,
+            'document': document
+        }), 200
+    except FileNotFoundError:
+        return jsonify({'error': 'Version not found'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Error retrieving version: {str(e)}'}), 500
+
+@api_bp.route('/compare/<version1_id>/<version2_id>', methods=['GET'])
+def compare_versions(version1_id, version2_id):
+    """Compare two versions of a document"""
+    try:
+        comparison = version_manager.compare_versions(version1_id, version2_id)
+        return jsonify({
+            'success': True,
+            'comparison': comparison
+        }), 200
+    except FileNotFoundError:
+        return jsonify({'error': 'One or both versions not found'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Error comparing versions: {str(e)}'}), 500
+

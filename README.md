@@ -19,6 +19,7 @@ An AI-powered legal document review assistant that automates document analysis, 
 ### Professional Features
 - **Multi-Format Support**: Process PDF and DOCX documents
 - **PDF Report Generation**: Export comprehensive analysis reports
+- **Document Versioning**: Track changes across multiple versions with comparison and rollback
 - **Modern UI/UX**: Professional legal-themed interface with dark mode
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
 - **Real-time Processing**: Live progress tracking during analysis
@@ -118,6 +119,12 @@ Legal Document Review Assistant/
 - `POST /api/export/<id>` - Export analysis as PDF
 - `GET /api/stats` - Get overall statistics
 - `GET /api/docs` - API documentation
+
+### Version Management
+- `POST /api/document/<id>/version` - Upload new version
+- `GET /api/document/<id>/versions` - List all versions
+- `GET /api/version/<version_id>` - Get specific version
+- `GET /api/compare/<v1_id>/<v2_id>` - Compare two versions
 
 ## 🎨 UI Features
 

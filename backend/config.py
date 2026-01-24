@@ -11,6 +11,7 @@ class Config:
     UPLOAD_FOLDER = BASE_DIR / 'uploads'
     PROCESSED_FOLDER = BASE_DIR / 'processed'
     REPORTS_FOLDER = BASE_DIR / 'reports'
+    VERSIONS_FOLDER = BASE_DIR / 'versions'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
     ALLOWED_EXTENSIONS = {'pdf', 'docx', 'doc'}
     
@@ -52,7 +53,7 @@ class Config:
     @classmethod
     def init_app(cls):
         """Initialize application directories"""
-        for folder in [cls.UPLOAD_FOLDER, cls.PROCESSED_FOLDER, cls.REPORTS_FOLDER]:
+        for folder in [cls.UPLOAD_FOLDER, cls.PROCESSED_FOLDER, cls.REPORTS_FOLDER, cls.VERSIONS_FOLDER]:
             folder.mkdir(parents=True, exist_ok=True)
 
 class DevelopmentConfig(Config):
