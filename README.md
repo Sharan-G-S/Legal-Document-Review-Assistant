@@ -1,4 +1,5 @@
 # Legal Document Review Assistant
+# Sharan G S
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
@@ -208,6 +209,4 @@ This project is licensed under the MIT License.
 
 For questions or support, please open an issue in the repository.
 
----
-
-**Note**: This tool is designed to assist with document review but should not replace professional legal advice. Always consult with a qualified attorney for important legal matters.
+Made with from Sharan G S
