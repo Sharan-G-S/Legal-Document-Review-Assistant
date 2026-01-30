@@ -21,6 +21,7 @@ An AI-powered legal document review assistant that automates document analysis, 
 - **PDF Report Generation**: Export comprehensive analysis reports
 - **Document Versioning**: Track changes across multiple versions with comparison and rollback
 - **Batch Processing**: Upload and analyze up to 10 documents simultaneously
+- **Document Search & Filtering**: Search across all documents with advanced filtering by risk level, document type, and content
 - **Modern UI/UX**: Professional legal-themed interface with dark mode
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
 - **Real-time Processing**: Live progress tracking during analysis
@@ -132,6 +133,10 @@ Legal Document Review Assistant/
 - `GET /api/batch/<batch_id>/status` - Get batch status
 - `GET /api/batch/<batch_id>/results` - Get batch results
 - `GET /api/batches` - List all batch jobs
+
+### Search & Filtering
+- `POST /api/search` - Search and filter documents with advanced queries
+- `GET /api/search/suggestions` - Get search suggestions and available filter options
 
 ## 🎨 UI Features
 

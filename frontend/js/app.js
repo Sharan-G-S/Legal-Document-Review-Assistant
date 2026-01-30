@@ -50,6 +50,9 @@ function initializeEventListeners() {
             filterClauses();
         });
     });
+
+    // Search functionality
+    initializeSearch();
 }
 
 // File Handling
@@ -406,4 +409,201 @@ function loadThemePreference() {
     if (theme === 'dark') {
         document.body.classList.add('dark-mode');
     }
+}
+
+// ============= SEARCH FUNCTIONALITY =============
+
+let searchState = {
+    query: '',
+    riskLevels: [],
+    sortBy: 'relevance'
+};
+
+let searchDebounceTimer = null;
+
+function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const clearSearch = document.getElementById('clearSearch');
+    const sortBy = document.getElementById('sortBy');
+    const riskChips = document.querySelectorAll('.chip[data-filter="risk"]');
+
+    // Search input with debouncing
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        searchState.query = query;
+
+        // Show/hide clear button
+        clearSearch.style.display = query ? 'block' : 'none';
+
+        // Debounce search
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+            performSearch();
+        }, 500);
+    });
+
+    // Clear search
+    clearSearch.addEventListener('click', () => {
+        searchInput.value = '';
+        searchState.query = '';
+        clearSearch.style.display = 'none';
+        document.getElementById('searchResults').style.display = 'none';
+    });
+
+    // Risk level chips
+    riskChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            chip.classList.toggle('active');
+
+            // Update risk levels array
+            searchState.riskLevels = Array.from(
+                document.querySelectorAll('.chip[data-filter="risk"].active')
+            ).map(c => c.dataset.value);
+
+            if (searchState.query || searchState.riskLevels.length > 0) {
+                performSearch();
+            }
+        });
+    });
+
+    // Sort by
+    sortBy.addEventListener('change', (e) => {
+        searchState.sortBy = e.target.value;
+        if (searchState.query || searchState.riskLevels.length > 0) {
+            performSearch();
+        }
+    });
+}
+
+async function performSearch() {
+    const { query, riskLevels, sortBy } = searchState;
+
+    // If no query and no filters, hide results
+    if (!query && riskLevels.length === 0) {
+        document.getElementById('searchResults').style.display = 'none';
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/search`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query: query,
+                risk_levels: riskLevels.length > 0 ? riskLevels : null,
+                sort_by: sortBy,
+                limit: 50
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Search failed');
+        }
+
+        const data = await response.json();
+        displaySearchResults(data.search_results);
+
+    } catch (error) {
+        console.error('Search error:', error);
+        document.getElementById('resultsCount').textContent = 'Error performing search';
+    }
+}
+
+function displaySearchResults(results) {
+    const searchResults = document.getElementById('searchResults');
+    const resultsCount = document.getElementById('resultsCount');
+    const resultsList = document.getElementById('resultsList');
+
+    // Show results section
+    searchResults.style.display = 'block';
+
+    // Update count
+    const count = results.total_results || 0;
+    resultsCount.textContent = `${count} result${count !== 1 ? 's' : ''} found`;
+
+    // Clear previous results
+    resultsList.innerHTML = '';
+
+    // Display results
+    if (!results.results || results.results.length === 0) {
+        resultsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No documents match your search criteria.</p>';
+        return;
+    }
+
+    results.results.forEach(result => {
+        const doc = result.document;
+        const item = document.createElement('div');
+        item.className = 'result-item';
+
+        // Format date
+        const date = doc.processed_at ? new Date(doc.processed_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        }) : 'Unknown date';
+
+        // Get snippet
+        let snippet = '';
+        if (result.matches && result.matches.length > 0) {
+            snippet = result.matches[0].text;
+            // Highlight search terms
+            if (searchState.query) {
+                const terms = searchState.query.toLowerCase().split(/\s+/);
+                terms.forEach(term => {
+                    const regex = new RegExp(`(${escapeRegex(term)})`, 'gi');
+                    snippet = snippet.replace(regex, '<mark>$1</mark>');
+                });
+            }
+        } else {
+            snippet = doc.summary?.executive_summary?.substring(0, 200) + '...' || 'No preview available';
+        }
+
+        // Risk badge color
+        const riskLevel = doc.risk_level || 'low';
+        const riskColor = {
+            'low': 'var(--risk-low)',
+            'medium': 'var(--risk-medium)',
+            'high': 'var(--risk-high)',
+            'critical': 'var(--risk-critical)'
+        }[riskLevel] || 'var(--primary-blue)';
+
+        item.style.borderLeftColor = riskColor;
+
+        item.innerHTML = `
+            <div class="result-header">
+                <div class="result-title">${doc.filename || 'Untitled Document'}</div>
+                <div class="result-meta">
+                    <span class="result-type">${doc.document_type || doc.summary?.document_type || 'Document'}</span>
+                    <span class="result-date">${date}</span>
+                </div>
+            </div>
+            <div class="result-snippet">${snippet}</div>
+            <div class="result-stats">
+                <span>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                        <circle cx="6" cy="6" r="5" fill="${riskColor}"/>
+                    </svg>
+                    ${riskLevel.toUpperCase()} Risk
+                </span>
+                <span>📄 ${doc.clauses?.length || 0} clauses</span>
+                <span>⚡ Score: ${Math.round(doc.risk_score || 0)}/100</span>
+            </div>
+        `;
+
+        // Click to view document
+        item.addEventListener('click', () => {
+            currentDocument = doc;
+            displayAnalysis(doc);
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        resultsList.appendChild(item);
+    });
+}
+
+function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

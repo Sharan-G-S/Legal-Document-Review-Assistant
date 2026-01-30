@@ -5,6 +5,7 @@ from config import Config
 from services.document_processor import DocumentProcessor
 from services.version_manager import VersionManager
 from services.batch_processor import BatchProcessor
+from services.search_service import SearchService
 from utils.pdf_generator import PDFReportGenerator
 import os
 import threading
@@ -29,6 +30,9 @@ batch_processor = BatchProcessor(
     batch_folder=config.BATCH_FOLDER,
     max_workers=config.CONCURRENT_WORKERS
 )
+
+# Initialize search service
+search_service = SearchService(config.PROCESSED_FOLDER)
 
 def allowed_file(filename):
     """Check if file extension is allowed"""
@@ -305,6 +309,26 @@ def api_documentation():
                 'path': '/api/version/<version_id>/restore',
                 'method': 'POST',
                 'description': 'Restore previous version'
+            },
+            {
+                'path': '/api/search',
+                'method': 'POST',
+                'description': 'Search and filter documents',
+                'parameters': {
+                    'query': 'Search query string',
+                    'risk_levels': 'Array of risk levels to filter',
+                    'document_types': 'Array of document types to filter',
+                    'date_from': 'Start date (ISO format)',
+                    'date_to': 'End date (ISO format)',
+                    'search_fields': 'Fields to search in',
+                    'sort_by': 'Sort order (relevance, date, risk_score)',
+                    'limit': 'Maximum results to return'
+                }
+            },
+            {
+                'path': '/api/search/suggestions',
+                'method': 'GET',
+                'description': 'Get search suggestions and filter options'
             }
         ]
     }
@@ -507,4 +531,75 @@ def list_batches():
     except Exception as e:
         return jsonify({
             'error': f'Error listing batches: {str(e)}'
+        }), 500
+
+
+# ============= SEARCH & FILTERING ENDPOINTS =============
+
+@api_bp.route('/search', methods=['POST'])
+def search_documents():
+    """
+    Search and filter documents
+    
+    Request body:
+    {
+        "query": "search terms",
+        "risk_levels": ["high", "critical"],
+        "document_types": ["NDA", "Contract"],
+        "date_from": "2024-01-01",
+        "date_to": "2024-12-31",
+        "search_fields": ["content", "clauses"],
+        "sort_by": "relevance",
+        "limit": 50
+    }
+    """
+    try:
+        data = request.get_json() or {}
+        
+        # Extract search parameters
+        query = data.get('query', '')
+        risk_levels = data.get('risk_levels')
+        document_types = data.get('document_types')
+        date_from = data.get('date_from')
+        date_to = data.get('date_to')
+        search_fields = data.get('search_fields')
+        sort_by = data.get('sort_by', 'relevance')
+        limit = data.get('limit', 50)
+        
+        # Perform search
+        results = search_service.search(
+            query=query,
+            risk_levels=risk_levels,
+            document_types=document_types,
+            date_from=date_from,
+            date_to=date_to,
+            search_fields=search_fields,
+            sort_by=sort_by,
+            limit=limit
+        )
+        
+        return jsonify({
+            'success': True,
+            'search_results': results
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            'error': f'Error performing search: {str(e)}'
+        }), 500
+
+
+@api_bp.route('/search/suggestions', methods=['GET'])
+def get_search_suggestions():
+    """Get search suggestions and available filter options"""
+    try:
+        suggestions = search_service.get_search_suggestions()
+        return jsonify({
+            'success': True,
+            'suggestions': suggestions
+        }), 200
+    
+    except Exception as e:
+        return jsonify({
+            'error': f'Error getting suggestions: {str(e)}'
         }), 500

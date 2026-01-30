@@ -1,15 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AI-powered legal document review assistant for automated clause detection and risk assessment">
+    <meta name="description"
+        content="AI-powered legal document review assistant for automated clause detection and risk assessment">
     <title>Legal Document Review Assistant | AI-Powered Analysis</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <!-- Header -->
     <header class="header">
@@ -17,24 +22,28 @@
             <div class="header-content">
                 <div class="logo">
                     <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                        <path d="M20 5L35 12.5V27.5C35 32.5 28 37 20 37C12 37 5 32.5 5 27.5V12.5L20 5Z" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path d="M20 15V30M15 20H25M15 25H25" stroke="currentColor" stroke-width="2"/>
+                        <path d="M20 5L35 12.5V27.5C35 32.5 28 37 20 37C12 37 5 32.5 5 27.5V12.5L20 5Z"
+                            stroke="currentColor" stroke-width="2" fill="none" />
+                        <path d="M20 15V30M15 20H25M15 25H25" stroke="currentColor" stroke-width="2" />
                     </svg>
                     <h1>Legal Document Review Assistant</h1>
                 </div>
                 <div class="header-actions">
                     <button class="btn-secondary" id="viewDocsBtn">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
+                            <path
+                                d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                         </svg>
                         Documents
                     </button>
                     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
                         <svg class="sun-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd"
+                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                                clip-rule="evenodd" />
                         </svg>
                         <svg class="moon-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                         </svg>
                     </button>
                 </div>
@@ -45,28 +54,81 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
+            <!-- Search Section -->
+            <section class="search-section" id="searchSection">
+                <div class="search-card">
+                    <h2>Search Documents</h2>
+                    <div class="search-bar-container">
+                        <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <input type="text" id="searchInput" class="search-input"
+                            placeholder="Search documents by content, clauses, or issues...">
+                        <button class="clear-search" id="clearSearch" style="display: none;">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path
+                                    d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Filter Controls -->
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label>Risk Level:</label>
+                            <div class="filter-chips">
+                                <button class="chip" data-filter="risk" data-value="low">Low</button>
+                                <button class="chip" data-filter="risk" data-value="medium">Medium</button>
+                                <button class="chip" data-filter="risk" data-value="high">High</button>
+                                <button class="chip" data-filter="risk" data-value="critical">Critical</button>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label>Sort By:</label>
+                            <select id="sortBy" class="sort-select">
+                                <option value="relevance">Relevance</option>
+                                <option value="date">Date</option>
+                                <option value="risk_score">Risk Score</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Search Results -->
+                    <div class="search-results" id="searchResults" style="display: none;">
+                        <div class="results-header">
+                            <h3 id="resultsCount">0 results found</h3>
+                        </div>
+                        <div class="results-list" id="resultsList"></div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Upload Section -->
             <section class="upload-section" id="uploadSection">
                 <div class="upload-card">
                     <div class="upload-icon">
                         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                            <path d="M32 8L52 20V44C52 50 42 56 32 56C22 56 12 50 12 44V20L32 8Z" stroke="currentColor" stroke-width="3" fill="none"/>
-                            <path d="M32 24V44M24 32H40" stroke="currentColor" stroke-width="3"/>
+                            <path d="M32 8L52 20V44C52 50 42 56 32 56C22 56 12 50 12 44V20L32 8Z" stroke="currentColor"
+                                stroke-width="3" fill="none" />
+                            <path d="M32 24V44M24 32H40" stroke="currentColor" stroke-width="3" />
                         </svg>
                     </div>
                     <h2>Upload Legal Document</h2>
                     <p class="upload-description">Upload a PDF or DOCX file for AI-powered analysis</p>
-                    
+
                     <div class="drop-zone" id="dropZone">
                         <input type="file" id="fileInput" accept=".pdf,.docx,.doc" hidden>
                         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                            <path d="M24 32V16M16 24L24 16L32 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M40 32V40H8V32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M24 32V16M16 24L24 16L32 24" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" />
+                            <path d="M40 32V40H8V32" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                         </svg>
                         <p><strong>Click to upload</strong> or drag and drop</p>
                         <p class="file-types">PDF or DOCX (max 16MB)</p>
                     </div>
-                    
+
                     <div class="progress-container" id="progressContainer" style="display: none;">
                         <div class="progress-bar">
                             <div class="progress-fill" id="progressFill"></div>
@@ -145,14 +207,17 @@
                 <div class="actions-card">
                     <button class="btn-primary" id="exportBtn">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z"/>
-                            <path d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6h-4.586l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"/>
+                            <path d="M8 2a1 1 0 000 2h2a1 1 0 100-2H8z" />
+                            <path
+                                d="M3 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v6h-4.586l1.293-1.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L10.414 13H15v3a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
                         </svg>
                         Export PDF Report
                     </button>
                     <button class="btn-secondary" id="newAnalysisBtn">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd"
+                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                clip-rule="evenodd" />
                         </svg>
                         New Analysis
                     </button>
@@ -170,4 +235,5 @@
 
     <script src="js/app.js"></script>
 </body>
+
 </html>
